@@ -5,6 +5,10 @@
     <title>Gameroom</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" href="/css/styles.css">
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/game.js"></script>
+
   </head>
   <body class="game">
 
@@ -13,8 +17,13 @@
       <div id="users"></div>
     </div>
 
+    <div class="game-start">
+      <button id="game-start-button" onclick="startGame()">Start Game</button>
+    </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/js/game.js"></script>
+    <div class="announcements">
+      <p id="announcements-text"></p>
+    </div>
+
   </body>
 </html>

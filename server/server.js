@@ -5,6 +5,8 @@ const socketIO = require('socket.io');
 
 const {isRealString} = require('./utils/isRealString');
 const {Users} = require('./utils/users');
+const {roles, presets} = require('./roles/roles.js');
+
 
 const publicPath = path.join(__dirname,'/../public');
 const port = process.env.PORT || 3000;
@@ -25,17 +27,32 @@ io.on('connect', (socket) => {
     }
 
     socket.join(params.room);
+
     users.removeUser(socket.id);
     users.addUser(socket.id, params.name, params.room);
 
+    let user = users.getUser(socket.id);
+    if(users.getRoomSize(params.room) == 1){
+      user.isHost = true;
+      console.log(user.name + " is the host: " + user.isHost);
+    }
+
     io.to(params.room).emit('updateUsersList', users.getUserList(params.room), )
 
-    // socket.emit('newMessage', generateMessage('Admin', 'Welcome to ${params.rom}!'));
-    callback();
-  });
+    socket.on('startGame', function() {
+      if(!user.isHost) return;
 
-  socket.on('createMessage', (message) => {
-    console.log("createMessage", message);
+      let selectedRoles = presets[users.getRoomSize(user.room) - 1];
+      users.getUsers(user.room).forEach((x) => {
+        let i = Math.floor(Math.random() * selectedRoles.length);
+        x.role = selectedRoles[i];
+        console.log(x.role);
+        selectedRoles.splice(i,1);
+        io.to(x.id).emit('gameStarted', x.role);
+      });
+    });
+
+    callback();
   });
 
   socket.on('disconnect', () => {
@@ -43,7 +60,6 @@ io.on('connect', (socket) => {
 
     if(user){
       io.to(user.room).emit('updateUsersList', users.getUserList(user.room));
-      // io.to(user.room).emit('newMessage', generateMessage('Admin', user.name + ' has left ' + user.room + ' chat room.'));
     }
   });
 

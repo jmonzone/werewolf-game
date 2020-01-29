@@ -6,6 +6,9 @@ function startGame(){
 }
 
 function selectVote(users){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML += "\n Select someone to vote for...";
+
   let ol = document.createElement('ol');
   ol.id = 'center-vote-list';
 
@@ -48,6 +51,9 @@ function announceResults(results){
 }
 
 function selectOptions(numOptions, descriptions){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML += "Select an option (they the same rn)";
+
   let ol = document.createElement('ol');
   ol.id = 'center-option-list';
 

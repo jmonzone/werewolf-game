@@ -7,6 +7,7 @@ class Users {
     let user = {id, name, room};
     user.isHost = false;
     user.role = ""
+    user.numVotes = 0;
     this.users.push(user);
 
     return user;

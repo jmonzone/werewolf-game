@@ -42,6 +42,7 @@ io.on('connect', (socket) => {
 
     io.to(params.room).emit('updateUsersList', users.getUserList(params.room));
 
+    let gm = gms.get(params.room);
 
     socket.on('startGame', function() {
       if(!user.isHost) return;
@@ -49,8 +50,22 @@ io.on('connect', (socket) => {
       gms.get(params.room).start(users.getUsers(params.room));
     });
 
+    socket.on('actionPerformed', function() {
+      if (gm.addReadyPlayer() == users.getRoomSize(params.room)){
+        io.to(params.room).emit('resolve', users.getUsers(params.room));
+        gm.resetReadyPlayers();
+      }
+    });
+
     socket.on('viewCenter', function(i) {
       io.to(socket.id).emit('revealCenter', i, gms.get(params.room).getCenterCard(i));
+    });
+
+    socket.on('voteCasted', function(i){
+      gm.addPlayerVote(users.getUsers(params.room)[i]);
+      if (gm.addReadyPlayer() == users.getRoomSize(params.room)){
+        io.to(params.room).emit('votesCalculated', gm.calculateMostVotes() );
+      }
     });
 
     callback();

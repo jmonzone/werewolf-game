@@ -5,6 +5,48 @@ function startGame(){
     console.log('Starting game.')
 }
 
+function selectVote(users){
+  let ol = document.createElement('ol');
+  ol.id = 'center-vote-list';
+
+  let i = 0;
+  users.forEach(function(user) {
+
+    if (user.id === socket.id) return;
+
+    let button = document.createElement('button');
+    button.id = 'vote-' + i;
+    button.innerHTML = user.name;
+    button.setAttribute( "onClick", "javascript: castVote(" + i + ");" );
+
+    ol.appendChild(button);
+    i++;
+  });
+
+  let usersList = document.querySelector('#center');
+  usersList.innerHTML = "";
+  usersList.appendChild(ol);
+}
+
+function castVote(i){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML += "\n Waiting for the other players...";
+
+  var voteButtons = document.getElementById('center-vote-list');
+  voteButtons.remove();
+
+  socket.on('votesCalculated', function(results){
+    announceResults(results);
+  });
+
+  socket.emit('voteCasted', i);
+}
+
+function announceResults(results){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML = results;
+}
+
 function selectOptions(numOptions, descriptions){
   let ol = document.createElement('ol');
   ol.id = 'center-option-list';
@@ -44,7 +86,7 @@ function selectCenter(numSelect, cachedSelected){
 
     let selected = cachedSelected.map((x) => x);
     selected.push(i);
-    
+
     if(numSelect > 1) {
       button.setAttribute( "onClick", "javascript: selectCenter(" + (numSelect - 1) +",[" + selected.toString() + "]" + ");" );
     } else {
@@ -60,17 +102,32 @@ function selectCenter(numSelect, cachedSelected){
   center.appendChild(ol);
 }
 
-function viewCenter(selectedIndexes){
-  selectedIndexes.forEach((i) => {
-    socket.emit('viewCenter', i);
+function completeAction(onResolve){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML += "\n Waiting for the other players...";
+
+  socket.on('resolve', function(users){
+    onResolve();
+    selectVote(users);
   });
+
+  socket.emit('actionPerformed');
+}
+
+function viewCenter(selectedIndexes){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML = "";
 
   var centerCards = document.getElementById('center-list');
   centerCards.remove();
 
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML = "";
+  completeAction(function(){
+    announcements.innerHTML = "";
 
+    selectedIndexes.forEach((i) => {
+      socket.emit('viewCenter', i);
+    });
+  });
 }
 
 socket.on('gameStarted', function(role) {
@@ -85,19 +142,21 @@ socket.on('gameStarted', function(role) {
 
     selectCenter(1, new Array());
 
-  } else if (role === 'seer'){
+  } else if (role === 'seer') {
 
     var descriptions = [
       "javascript: selectCenter(2,new Array());",
       "javascript: selectCenter(2,new Array());"
     ]
     selectOptions(2, descriptions);
+  } else {
+    completeAction(function(){});
   }
 });
 
 socket.on('revealCenter', function(i, centerCard) {
   var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += 'Center Card #' + (i + 1) + ' is the ' + centerCard + ".\n";
+  announcements.innerHTML += 'Center card #' + (i + 1) + ' is the ' + centerCard + ". \n";
 });
 
 socket.on('connect', function() {

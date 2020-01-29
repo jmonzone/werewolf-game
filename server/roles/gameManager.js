@@ -12,6 +12,8 @@ class GameManager {
     this.players = [];
     this.center = [];
     this.io = io;
+    this.readyPlayers = 0;
+    this.playerVotes = new Map();
   }
 
   assignRoles(){
@@ -41,6 +43,59 @@ class GameManager {
     this.announceRoles();
   }
 
+  addReadyPlayer(){
+    this.readyPlayers++;
+    return this.readyPlayers;
+  }
+
+  resetReadyPlayers(){
+    this.readyPlayers = 0;
+  }
+
+  addPlayerVote(user){
+    user.numVotes++;
+  }
+
+  calculateMostVotes(){
+    let highestVote = 0;
+
+    this.players.forEach((player) => {
+      console.log(player.name + " was voted: " + this.playerVotes.get(player) + " times.");
+
+      if (player.numVotes > highestVote){
+        highestVote = player.numVotes;
+      }
+    });
+
+    let votedPlayers = [];
+
+    this.players.forEach((player) => {
+      if (player.numVotes === highestVote){
+        votedPlayers.push(player);
+      }
+    });
+
+    let werewolfDead = false;
+    let results = ""
+
+    votedPlayers.forEach((player) => {
+      console.log("\n " + player.name + " has died.");
+      results += "\n " + player.name + " has died.";
+      if (player.role === 'werewolf')
+        werewolfDead = true;
+    });
+
+    if(werewolfDead)
+      results += "\n A werewolf has been killed. The villager team wins.";
+    else
+      results += "\n No werewolves have been killed. The werewolf team wins.";
+
+
+    return results;
+
+  }
+
+
   getCenterCard(i){
     return this.center[i];
   }
@@ -48,7 +103,7 @@ class GameManager {
   getRolePreset(){
     switch(this.players.length) {
       case 1:
-        return [roles.WEREWOLF, roles.SEER, roles.SEER, roles.WEREWOLF ];
+        return [roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER ];
         break;
       case 2:
         return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.VILLAGER, roles.VILLAGER ];

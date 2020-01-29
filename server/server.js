@@ -5,7 +5,7 @@ const socketIO = require('socket.io');
 
 const {isRealString} = require('./utils/isRealString');
 const {Users} = require('./utils/users');
-const {GameManager} = require('./roles/GameManager.js');
+const {GameManager} = require('./roles/gameManager.js');
 
 
 const publicPath = path.join(__dirname,'/../public');

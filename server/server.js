@@ -15,6 +15,7 @@ let app = express();
 let server = http.createServer(app);
 let io = socketIO(server);
 let users = new Users();
+let gms = new Map();
 
 app.use(express.static(publicPath));
 
@@ -34,21 +35,22 @@ io.on('connect', (socket) => {
     let user = users.getUser(socket.id);
     if(users.getRoomSize(params.room) == 1){
       user.isHost = true;
+      gms.set(params.room, new GameManager(io));
+
       console.log(user.name + " is the host: " + user.isHost);
     }
 
     io.to(params.room).emit('updateUsersList', users.getUserList(params.room));
 
-    let gm = new GameManager(io);
 
     socket.on('startGame', function() {
       if(!user.isHost) return;
 
-      gm.start(users.getUsers(params.room));
+      gms.get(params.room).start(users.getUsers(params.room));
     });
 
     socket.on('viewCenter', function(i) {
-      io.to(socket.id).emit('revealCenter', i, gm.getCenterCard(i));
+      io.to(socket.id).emit('revealCenter', i, gms.get(params.room).getCenterCard(i));
     });
 
     callback();

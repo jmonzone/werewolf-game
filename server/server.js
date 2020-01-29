@@ -37,14 +37,14 @@ io.on('connect', (socket) => {
       console.log(user.name + " is the host: " + user.isHost);
     }
 
-    io.to(params.room).emit('updateUsersList', users.getUserList(params.room), )
+    io.to(params.room).emit('updateUsersList', users.getUserList(params.room));
 
-    let gm = new GameManager(users.getUsers(params.room), io);
+    let gm = new GameManager(io);
 
     socket.on('startGame', function() {
       if(!user.isHost) return;
 
-      gm.start();
+      gm.start(users.getUsers(params.room));
     });
 
     socket.on('viewCenter', function(i) {

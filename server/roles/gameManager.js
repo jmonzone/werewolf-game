@@ -8,8 +8,8 @@ const roles = {
 
 class GameManager {
 
-  constructor(players, io) {
-    this.players = players;
+  constructor(io) {
+    this.players = [];
     this.center = [];
     this.io = io;
   }
@@ -30,12 +30,13 @@ class GameManager {
   }
 
   announceRoles(){
-    this.players.forEach((player) => {
-      this.io.to(player.id).emit('gameStarted', player.role);
+    this.players.forEach((x) => {
+      this.io.to(x.id).emit('gameStarted', x.role);
     });
   }
 
-  start(){
+  start(players){
+    this.players = players;
     this.assignRoles();
     this.announceRoles();
   }
@@ -50,7 +51,7 @@ class GameManager {
         return [roles.WEREWOLF, roles.SEER, roles.SEER, roles.WEREWOLF ];
         break;
       case 2:
-        return [roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.VILLAGER, roles.VILLAGER ];
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.VILLAGER, roles.VILLAGER ];
         break;
       case 3:
         return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER ];

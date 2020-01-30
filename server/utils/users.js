@@ -7,6 +7,7 @@ class Users {
     let user = {id, name, room};
     user.isHost = false;
     user.role = ""
+    user.originalRole = ""
     user.numVotes = 0;
     this.users.push(user);
 
@@ -30,7 +31,7 @@ class Users {
     return size;
   }
 
-  getUser(id){
+  getUser(id) {
     return this.users.filter((user) => user.id === id)[0];
   }
 
@@ -54,6 +55,15 @@ class Users {
 
     if(user){
       user.role = role;
+      user.originalRole = role;
+    }
+  }
+
+  incrementVote(id){
+    let user = this.getUser(id);
+
+    if(user){
+      user.numVotes++;
     }
   }
 }

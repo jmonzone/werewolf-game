@@ -57,12 +57,45 @@ io.on('connect', (socket) => {
       }
     });
 
-    socket.on('viewCenter', function(i) {
-      io.to(socket.id).emit('revealCenter', i, gms.get(params.room).getCenterCard(i));
+    socket.on('viewCenter', function(selection) {
+      var center = [];
+      for (var i = 0; i < selection.length; i++){
+        var db = {
+          "id": selection[i] + 1,
+          "role": gm.getCenterCard(selection[i])
+        }
+        center.push(db);
+      }
+      io.to(socket.id).emit('revealCenter', center);
     });
 
-    socket.on('voteCasted', function(i){
-      gm.addPlayerVote(users.getUsers(params.room)[i]);
+    socket.on('viewPlayerRequest', (selection) => {
+      var revealedPlayers = [];
+      for (var i = 0; i < selection.length; i++){
+        var revealedPlayer = users.getUser(selection[i]);
+        revealedPlayers.push(revealedPlayer);
+      }
+      io.to(socket.id).emit('playersRevealed', revealedPlayers);
+    });
+
+    socket.on('robPlayer', (targetId) => {
+      var robber = users.getUser(socket.id);
+      var target = users.getUser(targetId);
+      var temp = robber.role;
+
+      robber.role = target.role;
+      target.role = temp;
+
+      var db = {
+        stolenRole: robber.role,
+        targetPlayer: target.name,
+      }
+
+      io.to(socket.id).emit('playerRobbed', db);
+    });
+
+    socket.on('voteCasted', (player) => {
+      users.incrementVote(player);
       if (gm.addReadyPlayer() == users.getRoomSize(params.room)){
         io.to(params.room).emit('votesCalculated', gm.calculateMostVotes() );
       }

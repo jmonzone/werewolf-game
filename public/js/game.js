@@ -1,168 +1,239 @@
 let socket = io();
 
-function startGame(){
-    socket.emit('startGame');
-    console.log('Starting game.')
-}
+function selectOption(options) {
 
-function selectVote(users){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += "\n Select someone to vote for...";
+  var ol = document.createElement('ol');
 
-  let ol = document.createElement('ol');
-  ol.id = 'center-vote-list';
+  options.forEach((option) => {
 
-  let i = 0;
-  users.forEach(function(user) {
+    var button = document.createElement('button');
+    button.innerHTML = option.description;
 
-    if (user.id === socket.id) return;
-
-    let button = document.createElement('button');
-    button.id = 'vote-' + i;
-    button.innerHTML = user.name;
-    button.setAttribute( "onClick", "javascript: castVote(" + i + ");" );
+    button.addEventListener('click', () => {
+      option.onSelect.apply(null, option.params)
+    });
 
     ol.appendChild(button);
-    i++;
   });
 
-  let usersList = document.querySelector('#center');
-  usersList.innerHTML = "";
-  usersList.appendChild(ol);
+
+  // for(var i = 0; i < options.length; i++){
+  //
+  //   var option = options[i];
+  //
+  //   var button = document.createElement('button');
+  //   button.innerHTML = option.description;
+  //   console.log(option.onSelect);
+  //
+  //   button.addEventListener('click', () => {
+  //     option.onSelect.apply(null, option.params)
+  //   });
+  //
+  //   ol.appendChild(button);
+  // }
+
+  let interactions = clearInteractions();
+  interactions.appendChild(ol);
 }
 
-function castVote(i){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += "\n Waiting for the other players...";
-
-  var voteButtons = document.getElementById('center-vote-list');
-  voteButtons.remove();
-
-  socket.on('votesCalculated', function(results){
-    announceResults(results);
-  });
-
-  socket.emit('voteCasted', i);
-}
-
-function announceResults(results){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML = results;
-}
-
-function selectOptions(numOptions, descriptions){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += "Select an option (they the same rn)";
+function selectPlayer(n, players, cachedSelected, onSelect){
 
   let ol = document.createElement('ol');
-  ol.id = 'center-option-list';
 
-  for(i = 0; i < numOptions; i++){
+  for (var i = 0; i < players.length; i++) {
 
-      let button = document.createElement('button');
-      button.id = 'option-' + (i + 1);
-      button.innerHTML = 'Option #' + (i + 1);
-      button.setAttribute( "onClick", descriptions[i] );
-      ol.appendChild(button);
-  }
+    var player = players[i];
+    if (player.id === socket.id) continue;
+    if (cachedSelected.includes(i)) continue;
 
-    let center = document.querySelector('#center');
-    center.innerHTML = "";
-    center.appendChild(ol);
-}
+    var button = document.createElement('button');
+    button.innerHTML = player.name;
 
-function selectCenter(numSelect, cachedSelected){
-  let ol = document.createElement('ol');
-  ol.id = 'center-list';
+    var selected = cachedSelected.map((x) => x);
+    selected.push(player.id);
 
-  for(i = 0; i < 3; i++){
-
-    console.log(cachedSelected);
-
-    if (cachedSelected.includes(i)){
-      console.log("included.");
-      continue;
+    if(n > 1) {
+      button.addEventListener('click', () => {
+        selectPlayer(n - 1, users, selected, onSelect);
+      });
     } else {
-      console.log("not included.");
+      button.addEventListener('click', () => {
+        clearInteractions();
+        onSelect(selected);
+       });
     }
 
+    ol.appendChild(button);
+  }
+
+  let interactions = clearInteractions();
+  interactions.appendChild(ol);
+}
+
+function selectCenter(n, cachedSelected, onSelect){
+
+  console.log("selecting center");
+  let ol = document.createElement('ol');
+
+  for(var i = 0; i < 3; i++){
+
+    if (cachedSelected.includes(i)) continue;
+
     let button = document.createElement('button');
-    button.id = 'center-card-' + (i + 1);
     button.innerHTML = 'Center Card #' + (i + 1);
 
     let selected = cachedSelected.map((x) => x);
     selected.push(i);
 
-    if(numSelect > 1) {
-      button.setAttribute( "onClick", "javascript: selectCenter(" + (numSelect - 1) +",[" + selected.toString() + "]" + ");" );
+    if(n > 1) {
+      button.addEventListener('click', () => {
+        selectCenter(n - 1, selected, onSelect);
+      });
     } else {
-      button.setAttribute( "onClick", "javascript: viewCenter([" + selected.toString() + "]);" );
+      button.addEventListener('click', () => {
+        clearInteractions();
+        onSelect(selected);
+       });
     }
 
     ol.appendChild(button);
   }
 
-
-  let center = document.querySelector('#center');
-  center.innerHTML = "";
-  center.appendChild(ol);
+  let interactions = clearInteractions();
+  interactions.appendChild(ol);
 }
 
-function completeAction(onResolve){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += "\n Waiting for the other players...";
-
-  socket.on('resolve', function(users){
-    onResolve();
-    selectVote(users);
+function viewCenter(n) {
+  selectCenter(n, new Array(), (selection) => {
+    socket.on('resolve', (db) => {
+      socket.emit('viewCenter', selection);
+    });
+    completeAction();
   });
+}
 
+function viewPlayer(n, players){
+  selectPlayer(n, players, new Array(), (selection) => {
+    socket.on('resolve', (db) => {
+      socket.emit('viewPlayerRequest', selection);
+    });
+    completeAction();
+  });
+}
+
+function robPlayer(players){
+  selectPlayer(1, players, new Array(), (selection) => {
+    socket.on('resolve', (db) => {
+      socket.emit('robPlayer', selection[0]);
+    });
+    completeAction();
+  });
+}
+
+function votePlayer(players){
+  selectPlayer(1, players, new Array(), (selection) => {
+    socket.on('votesCalculated', (results) => {
+      clearAnnouncements();
+      announce(results);
+    });
+
+    socket.emit('voteCasted', selection[0]);
+  });
+}
+
+function clearInteractions(){
+  var interactions = document.querySelector('#interactions');
+  interactions.innerHTML = "";
+  return interactions;
+}
+
+function clearAnnouncements(){
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML = "";
+}
+
+function announce(message) {
+  var announcements = document.getElementById('announcements-text');
+  announcements.innerHTML += message;
+}
+
+function completeAction(){
+  socket.on('resolve', (players) => votePlayer(players));
   socket.emit('actionPerformed');
 }
 
-function viewCenter(selectedIndexes){
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML = "";
+function werewolfAction(db){
 
-  var centerCards = document.getElementById('center-list');
-  centerCards.remove();
+  var werewolfPlayers = db.players.filter((player) => player.role == 'werewolf');
 
-  completeAction(function(){
-    announcements.innerHTML = "";
+  if (werewolfPlayers.length == 1) {
+    announce("You are the lone wolf. You may select one center role to view. ");
+    viewCenter(1);
+  } else {
+    completeAction();
+  }
 
-    selectedIndexes.forEach((i) => {
-      socket.emit('viewCenter', i);
-    });
-  });
 }
 
-socket.on('gameStarted', function(role) {
-  var startButton = document.getElementById('game-start-button');
-  startButton.remove();
+function seerAction(db){
+  announce("You may view one player's role or view two of the center roles. ");
+  var options = [
+    {
+      "onSelect": viewPlayer,
+      "params": [1, db.players],
+      "description": "View a player",
+    },
+    {
+      "onSelect": viewCenter,
+      "params": [2],
+      "description": "View the center",
+    },
+  ]
+  selectOption(options);
+}
 
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML = 'Game Started.';
-  announcements.innerHTML += '\nYou are the ' + role + '.';
+function robberAction(db){
+  announce("Select a player to exchange your role with. ");
+  robPlayer(db.players);
+}
 
-  if(role === 'werewolf'){
+socket.on('gameHasBegun', function(db) {
 
-    selectCenter(1, new Array());
+  clearInteractions();
+  announce('Game Started. You are the ' + db.role + '. ');
 
-  } else if (role === 'seer') {
-
-    var descriptions = [
-      "javascript: selectCenter(2,new Array());",
-      "javascript: selectCenter(2,new Array());"
-    ]
-    selectOptions(2, descriptions);
-  } else {
-    completeAction(function(){});
+  switch (db.role) {
+    case 'werewolf':
+      werewolfAction(db);
+      break;
+    case 'seer':
+      seerAction(db);
+      break;
+    case 'robber':
+      robberAction(db);
+      break;
+    default:
+      completeAction();
   }
 });
 
-socket.on('revealCenter', function(i, centerCard) {
-  var announcements = document.getElementById('announcements-text');
-  announcements.innerHTML += 'Center card #' + (i + 1) + ' is the ' + centerCard + ". \n";
+socket.on('revealCenter', function(center) {
+  for (var i = 0; i < center.length; i++){
+    announce('Center card #' + center[i].id + ' is the ' + center[i].role + ". \n");
+  }
+});
+
+socket.on('playersRevealed', (revealedPlayers) => {
+  console.log(revealedPlayers);
+
+  for (var i = 0; i < revealedPlayers.length; i++){
+    var revealedPlayer = revealedPlayers[i];
+    announce(revealedPlayer.name + ' is the ' + revealedPlayer.role + ". \n");
+  }
+});
+
+socket.on('playerRobbed', (db) => {
+  announce("You robbed the " + db.stolenRole + " from " + db.targetPlayer);
 });
 
 socket.on('connect', function() {
@@ -176,6 +247,11 @@ socket.on('connect', function() {
     } else {
       console.log('Room joined.');
     }
+  });
+
+  var startButton = document.getElementById('start-button');
+  startButton.addEventListener('click', () => {
+    socket.emit('startGame');
   });
 
 });

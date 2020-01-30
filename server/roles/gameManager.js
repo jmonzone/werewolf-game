@@ -8,10 +8,11 @@ const roles = {
 
 class GameManager {
 
-  constructor(io) {
+  constructor(io, room) {
     this.players = [];
     this.center = [];
     this.io = io;
+    this.room = room;
     this.readyPlayers = 0;
     this.playerVotes = new Map();
   }
@@ -21,6 +22,7 @@ class GameManager {
     this.players.forEach((player) => {
       let i = Math.floor(Math.random() * roles.length);
       player.role = roles[i];
+      player.originalRole = roles[i];
       roles.splice(i,1);
     });
 
@@ -32,14 +34,16 @@ class GameManager {
   }
 
   announceRoles(){
-    this.players.forEach((x) => {
+    this.players.forEach((player) => {
 
       var db = {
-        "role": x.role,
-        "players": this.players,
+        role: player.role,
+        players: this.players,
       };
 
-      this.io.to(x.id).emit('gameHasBegun', db);
+      this.io.to(player.id).emit('gameHasBegun', db);
+      this.io.to(player.id).emit('msgSent', "Game: Game Started.");
+      this.io.to(player.id).emit('msgSent', "Game: You are the " + player.role + ".");
     });
   }
 
@@ -62,7 +66,6 @@ class GameManager {
     let highestVote = 0;
 
     this.players.forEach((player) => {
-      console.log(player.name + " was voted: " + player.numVotes + " times.");
 
       if (player.numVotes > highestVote){
         highestVote = player.numVotes;
@@ -88,15 +91,15 @@ class GameManager {
     });
 
     if(werewolfDead)
-      results += "\n A werewolf has been killed. The villager team wins.";
+      this.io.to(this.room).emit('msgSent', "Game: A werewolf has been killed. The villager team wins.");
     else
-      results += "\n No werewolves have been killed. The werewolf team wins.";
+      this.io.to(this.room).emit('msgSent', "Game: No werewolves have been killed. The werewolf team wins.");
 
     this.players.forEach((player) => {
       if (player.originalRole === player.role)
-        results += "\n" + player.name + " started as the " + player.originalRole + " and is still the " + player.role + ".";
+        this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is still the " + player.role + ".");
       else {
-        results += "\n" + player.name + " started as the " + player.originalRole + " and is now the " + player.role + ".";
+        this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is now the " + player.role + ".");
       }
     });
 
@@ -119,13 +122,28 @@ class GameManager {
         return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.VILLAGER ];
         break;
       case 3:
-        return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.VILLAGER, roles.VILLAGER ];
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER ];
         break;
       case 4:
         return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER ];
         break;
       case 5:
         return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER];
+        break;
+      case 6:
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER];
+        break;
+      case 7:
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER];
+        break;
+      case 8:
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER];
+        break;
+      case 9:
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER];
+        break;
+      case 10:
+        return [roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.WEREWOLF, roles.SEER, roles.ROBBER, roles.TROUBLEMAKER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.VILLAGER, roles.WEREWOLF];
         break;
     }
   }

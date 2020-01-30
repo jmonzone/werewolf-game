@@ -50,15 +50,6 @@ class Users {
     return user;
   }
 
-  setRole(id, role){
-    let user = this.getUser(id);
-
-    if(user){
-      user.role = role;
-      user.originalRole = role;
-    }
-  }
-
   incrementVote(id){
     let user = this.getUser(id);
 

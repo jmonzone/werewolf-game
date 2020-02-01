@@ -4,30 +4,35 @@
     <meta charset="utf-8">
     <title>Gameroom</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/game.css">
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
-
+    <script type="text/javascript" src="/js/chat.js"></script>
   </head>
   <body class="game">
 
-    <div class="game-sidebar">
-      <h3>Players</h3>
-      <div id="users"></div>
-    </div>
-
-    <div class="interactions">
-      <div id="interactions">
-        <button id="start-button">Start Game</button>
+    <div class="sidebar">
+      <div id="users-label">Players</div>
+      <div id="users">
       </div>
     </div>
 
-    <div id="chat-text" style="width:500px;height:150px;overflow-y:scroll">
+    <div class="role-selection">
+      <div id="roles"></div>
     </div>
-    <form id="chat-form">
-      <input id="chat-input" type="text" style="width:500px"></input>
-    </form>
+    <div class="interactions">
+      <div id="interactions">
+        <!-- <button id="start-button">Start Game</button> -->
+      </div>
+    </div>
+
+    <div class="chat">
+      <div id="chat-text"></div>
+      <form id="chat-form">
+        <input id="chat-input" type="text"></input>
+      </form>
+    </div>
 
   </body>
 </html>

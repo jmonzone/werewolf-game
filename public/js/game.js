@@ -1,5 +1,48 @@
 let socket = io();
 
+socket.on('connect', function() {
+  let searchQuery = window.location.search.substring(1);
+  let params = JSON.parse('{"' + decodeURI(searchQuery).replace(/&/g, '","').replace(/\+/g, ' ').replace(/=/g,'":"') + '"}');
+
+  socket.emit('join', params, function(err, isHost) {
+    if(err){
+      alert(err);
+      window.location.href = '/';
+      return;
+    }
+    console.log('Room joined.');
+    if (isHost){
+      var startButton = document.createElement('button');
+      startButton.innerHTML = 'Start Game'
+      startButton.addEventListener('click', () => {
+        socket.emit('startGame');
+      });
+      let interactions = document.querySelector('#interactions');
+      interactions.appendChild(startButton);
+    }
+
+  });
+
+
+});
+
+socket.on('disconnect', function() {
+  console.log('Disconnected from server.');
+});
+
+socket.on('updateUsersList', function(users) {
+
+  let usersList = document.getElementById('users');
+  usersList.innerHTML = "";
+
+  users.forEach(function(name) {
+    var user = document.createElement('div');
+    user.className = 'user-list-cell';
+    user.innerHTML = name;
+    usersList.appendChild(user);
+  });
+});
+
 function selectOption(options) {
 
   var ol = document.createElement('ol');
@@ -216,65 +259,4 @@ socket.on('gameHasBegun', function(db) {
     default:
       completeAction();
   }
-});
-
-socket.on('msgSent',function(data){
-  var chatText = document.getElementById('chat-text');
-  chatText.innerHTML += '<div>' + data + '</div>';
-  scrollToBottom();
-});
-
-socket.on('connect', function() {
-  let searchQuery = window.location.search.substring(1);
-  let params = JSON.parse('{"' + decodeURI(searchQuery).replace(/&/g, '","').replace(/\+/g, ' ').replace(/=/g,'":"') + '"}');
-
-  socket.emit('join', params, function(err) {
-    if(err){
-      alert(err);
-      window.location.href = '/';
-    } else {
-      console.log('Room joined.');
-    }
-  });
-
-  var startButton = document.getElementById('start-button');
-  startButton.addEventListener('click', () => {
-    socket.emit('startGame');
-  });
-
-  var chatInput = document.getElementById('chat-input');
-  var chatForm = document.getElementById('chat-form');
-
-  chatForm.onsubmit = function(e){
-    e.preventDefault();
-    if(chatInput.value[0] === '/')
-      socket.emit('evalServer',chatInput.value.slice(1));
-    else
-      socket.emit('sendMsgReq',chatInput.value);
-    chatInput.value = '';
-  }
-
-});
-
-function scrollToBottom(){
-  var messages = document.querySelector('#chat-text').lastElementChild;
-  messages.scrollIntoView();
-}
-
-socket.on('disconnect', function() {
-  console.log('Disconnected from server.');
-});
-
-socket.on('updateUsersList', function(users) {
-  let ol = document.createElement('ol');
-
-  users.forEach(function(user) {
-    let li = document.createElement('li');
-    li.innerHTML = user;
-    ol.appendChild(li);
-  });
-
-  let usersList = document.querySelector('#users');
-  usersList.innerHTML = "";
-  usersList.appendChild(ol);
 });

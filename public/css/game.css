@@ -1,0 +1,66 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar{
+  text-align: center;
+}
+#users-label{
+  font-size: 50px;
+}
+
+#users {
+  display: grid;
+  grid-template: auto;
+
+  column-gap: 5%;
+}
+
+
+#interactions{
+  text-align: center;
+}
+
+button {
+  height: 75px;
+  width: 150px;
+  margin-top: 5%;
+  margin-bottom: 5%;
+  margin-right: 5px;
+  margin-left: 5px;
+  font-size: 100%;
+}
+
+.user-list-cell{
+  text-align: center;
+  background-color: lightblue;
+  font-size:150%;
+}
+
+.chat {
+    position: fixed;
+    bottom: 0;
+    width:100%;
+    height:40%;
+    border-top: 6px solid black;
+    background-color: lightgrey;
+}
+
+.example::-webkit-scrollbar {
+    display: none;
+}
+
+#chat-text {
+  height:95%;
+  overflow:scroll;
+  font-size:150%;
+}
+
+#chat-input {
+  width:100%;
+  height:5%;
+  position: fixed;
+  bottom: 0;
+  font-size:100%;
+}

@@ -11,47 +11,44 @@ body {
 .table{
   color:white;
   font-family: arial;
+  font-size: 20px;
   text-align: center;
   margin-top: 40px;
 }
 
 .table-center {
   display: grid;
-  margin: 20px;
+  margin: 5px;
 
-  grid-template-columns: auto auto auto;
-  grid-gap: 20px;
-  padding: 10px;
-  justify-content: center;
-}
-
-.table-center-cell {
-  background-color: goldenrod;
-  border: 2px solid black;
-  height: 40px;
-  width: 25px;
-  padding: 20px;
-  border-radius: 25px;
-  font-size: 14px;
-  text-align: center;
-}
-
-.table-players {
-  display: grid;
   grid-template-columns: auto auto auto;
   grid-gap: 10px;
   padding: 10px;
   justify-content: center;
 }
 
+.table-center-cell {
+  background-color: darkgoldenrod;
+  height: 80px;
+  width: 60px;
+  border-radius: 15px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.table-players {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: 20px;
+  padding: 10px;
+  justify-content: center;
+}
+
 .table-players-cell {
   background-color: darkgoldenrod;
-  border: 2px solid black;
-  height: 70px;
-  width: 50px;
-  padding: 20px;
+  height: 80px;
+  width: 60px;
+  border-radius: 15px;
   font-size: 20px;
-  border-radius: 25px;
   text-align: center;
 }
 

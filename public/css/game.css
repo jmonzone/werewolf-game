@@ -10,7 +10,7 @@ body {
 
 .table{
   color:white;
-  font-family: fantasy;
+  font-family: arial;
   text-align: center;
   margin-top: 40px;
 }
@@ -32,7 +32,7 @@ body {
   width: 25px;
   padding: 20px;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: 14px;
   text-align: center;
 }
 

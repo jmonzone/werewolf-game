@@ -15,7 +15,7 @@ socket.on('connect', function() {
 
 socket.on('msgSent',function(data){
   var chatText = document.getElementById('chat-text');
-  chatText.innerHTML += '<div>' + data + '</div>';
+  chatText.innerHTML += '<div class="chat-message">' + data + '</div>';
   scrollToBottom();
 });
 

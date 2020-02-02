@@ -33,7 +33,7 @@ class GameManager {
     socket.on('viewCenter', (selection) => this.viewCenterRole(socket, selection));
     socket.on('viewPlayerRequest', (selection) => this.viewPlayerRole(socket,selection));
     socket.on('swapSelfRequest', (selection) => this.swapSelfRole(socket, selection));
-    socket.on('swapPlayersRequest', (selections) => this.swapPlayerRole(socket, selection));
+    socket.on('swapPlayersRequest', (selections) => this.swapPlayerRole(socket, selections));
   }
 
   start(player){
@@ -92,8 +92,8 @@ class GameManager {
   }
 
   swapPlayerRole(socket, selection){
-    var target1 = this.getPlayer(selection[0]);
-    var target2 = this.getPlayer(selection[1]);
+    var target1 = this.players.get(selection[0]);
+    var target2 = this.players.get(selection[1]);
     var temp = target1.role;
     target1.role = target2.role;
     target2.role = temp;
@@ -126,6 +126,9 @@ class GameManager {
       });
     });
 
+    this.io.to(this.room).emit('msgSent', 'Game: Select a player to vote and kill.');
+
+
     this.readyPlayers = 0;
   }
 
@@ -133,7 +136,7 @@ class GameManager {
     if (this.votes.get(id) === undefined) this.votes.set(id, 1);
     else this.votes.set(id, this.votes.get(id) + 1);
 
-    if (++this.readyPlayers == this.players.size) this.io.to(this.room).emit('votesCalculated', this.calculateMostVotes());
+    if (++this.readyPlayers == this.players.size) this.calculateMostVotes();
     else this.io.to(socket.id).emit('msgSent', 'Game: Waiting for other players to vote.');
   }
 
@@ -154,31 +157,35 @@ class GameManager {
     });
 
     let werewolfDead = false;
+    var werewolfExists = false;
     let results = ""
+
+    this.players.forEach((player) => {
+      if (player.role == 'werewolf' )
+        werewolfExists = true;
+    });
 
     votedPlayers.forEach((id) => {
       var player = this.players.get(id);
-      results += "\n " + player.name + " has died.";
+      this.io.to(this.room).emit('msgSent', "Game: " + player.name + " has died as the " + player.role + ".");
       if (player.role === 'werewolf')
         werewolfDead = true;
     });
 
-    if(werewolfDead)
-      this.io.to(this.room).emit('msgSent', "Game: A werewolf has been killed. The villager team wins.");
+    if(werewolfDead && werewolfExists)
+      this.io.to(this.room).emit('msgSent', "Game: The VILLAGER team wins.");
+    else if (!werewolfExists)
+      this.io.to(this.room).emit('msgSent', "Game: The werewolves were in the center. The VILLAGER team wins.");
     else
-      this.io.to(this.room).emit('msgSent', "Game: No werewolves have been killed. The werewolf team wins.");
+      this.io.to(this.room).emit('msgSent', "Game: The WEREWOLF team wins.");
 
-    this.players.forEach((player) => {
-      if (player.originalRole === player.role)
-        this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is still the " + player.role + ".");
-      else {
-        this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is now the " + player.role + ".");
-      }
-    });
-
-
-    return results;
-
+    // this.players.forEach((player) => {
+    //   if (player.originalRole === player.role)
+    //     this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is still the " + player.role + ".");
+    //   else {
+    //     this.io.to(this.room).emit('msgSent', "Game: " + player.name + " started as the " + player.originalRole + " and is now the " + player.role + ".");
+    //   }
+    // });
   }
 
   getRolePreset(){

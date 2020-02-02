@@ -1,66 +1,111 @@
-html, body {
-    margin: 0;
-    padding: 0;
+* {
+  padding: 0;
+  margin: 0;
 }
 
-.sidebar{
+body {
+  font-family: arial;
+  background-color: black;
+}
+
+.table{
+  color:white;
+  font-family: fantasy;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.table-center {
+  display: grid;
+  margin: 20px;
+
+  grid-template-columns: auto auto auto;
+  grid-gap: 20px;
+  padding: 10px;
+  justify-content: center;
+}
+
+.table-center-cell {
+  background-color: goldenrod;
+  border: 2px solid black;
+  height: 40px;
+  width: 25px;
+  padding: 20px;
+  border-radius: 25px;
+  font-size: 16px;
   text-align: center;
 }
-#users-label{
-  font-size: 50px;
-}
 
-#users {
+.table-players {
   display: grid;
-  grid-template: auto;
-
-  column-gap: 5%;
+  grid-template-columns: auto auto auto;
+  grid-gap: 10px;
+  padding: 10px;
+  justify-content: center;
 }
 
+.table-players-cell {
+  background-color: darkgoldenrod;
+  border: 2px solid black;
+  height: 70px;
+  width: 50px;
+  padding: 20px;
+  font-size: 20px;
+  border-radius: 25px;
+  text-align: center;
+}
 
 #interactions{
   text-align: center;
 }
 
 button {
-  height: 75px;
-  width: 150px;
-  margin-top: 5%;
-  margin-bottom: 5%;
-  margin-right: 5px;
-  margin-left: 5px;
-  font-size: 100%;
+  background-color: green;
+  border-radius: 25px;
+  width: 40%;
+  height: 60px;
+  margin: 10px;
+  color: white;
+  cursor: pointer;
+  border: none;
+  font-size: 20px;
 }
 
-.user-list-cell{
-  text-align: center;
-  background-color: lightblue;
-  font-size:150%;
+button:hover {
+  opacity: 0.8;
 }
+
 
 .chat {
-    position: fixed;
-    bottom: 0;
-    width:100%;
-    height:40%;
-    border-top: 6px solid black;
-    background-color: lightgrey;
+  border-top: 6px solid goldenrod;
+  background-color: lightgrey;
+
+  position: fixed;
+  bottom:50px;
+  width:100%;
+  height:30%;
+
+  overflow:scroll;
+  font-size: 18px;
 }
 
 .example::-webkit-scrollbar {
     display: none;
 }
 
+
+.chat-message {
+  margin: 5px 10px;
+}
+
 #chat-text {
-  height:95%;
-  overflow:scroll;
-  font-size:150%;
+  margin-top: 10px;
 }
 
 #chat-input {
-  width:100%;
-  height:5%;
   position: fixed;
-  bottom: 0;
-  font-size:100%;
+  bottom: 0px;
+  width:100%;
+  height:50px;
+  font-size: 100%;
 }

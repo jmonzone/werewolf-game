@@ -2,28 +2,27 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Join Room | Werewolf</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Join Room | One Night Werewolf</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/index.css">
   </head>
-  <body class="centered-form">
-    <div class="centered-form">
+  <body>
+
+    <img class="img-title" src="../img/logo.png" alt="title">
+
+    <div class="form-wrapper">
       <form action="/game.html">
-        <div class="title">
-          <img src="../img/logo.png" alt="Logo">
+        <div class="form-field">
+          <label>Display Name</label> <br>
+          <input class="form-input" type="text" name="name" placeholder="Enter a nickname..." autofocus>
         </div>
         <div class="form-field">
-          <label>Display name</label>
-          <input type="text" name="name" autofocus>
+          <label>Room Name</label> <br>
+          <input class="form-input" type="text" name="room" placeholder="Enter a roomname..." autofocus>
         </div>
-        <div class="form-field">
-          <label>Room name</label>
-          <input type="text" name="room" autofocus>
-        </div>
-        <div class="button">
-          <button>Join</button>
-        </div>
+        <button class="button-join">JOIN</button>
       </form>
     </div>
+
   </body>
 </html>

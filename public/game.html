@@ -9,21 +9,28 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
     <script type="text/javascript" src="/js/chat.js"></script>
+    <script type="text/javascript" src="/js/table.js"></script>
   </head>
   <body class="game">
-
-    <div class="sidebar">
-      <div id="users-label">Players</div>
-      <div id="users">
-      </div>
-    </div>
 
     <div class="role-selection">
       <div id="roles"></div>
     </div>
+
+    <div class="table">
+      Center Cards
+      <div class="table-center">
+        <div class="table-center-cell">1</div>
+        <div class="table-center-cell">2</div>
+        <div class="table-center-cell">3</div>
+      </div>
+      Players
+      <div class="table-players" id="table-players">
+      </div>
+    </div>
+
     <div class="interactions">
       <div id="interactions">
-        <!-- <button id="start-button">Start Game</button> -->
       </div>
     </div>
 

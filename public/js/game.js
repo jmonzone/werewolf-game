@@ -3,7 +3,7 @@ let socket = io();
 socket.on('connect', function() {
   let searchQuery = window.location.search.substring(1);
   let params = JSON.parse('{"' + decodeURI(searchQuery).replace(/&/g, '","').replace(/\+/g, ' ').replace(/=/g,'":"') + '"}');
-
+  params.room = params.room.toLowerCase();
   socket.emit('join', params, function(err, isHost) {
     if(err){
       alert(err);
@@ -32,16 +32,39 @@ socket.on('disconnect', function() {
 
 socket.on('updateUsersList', function(users) {
 
-  let usersList = document.getElementById('users');
+  let usersList = document.getElementById('table-players');
   usersList.innerHTML = "";
 
   users.forEach(function(name) {
     var user = document.createElement('div');
-    user.className = 'user-list-cell';
+    user.className = 'table-players-cell';
     user.innerHTML = name;
     usersList.appendChild(user);
   });
 });
+
+socket.on('gameHasBegun', function(db) {
+
+  clearInteractions();
+
+  switch (db.role) {
+    case 'werewolf':
+      werewolfAction(db);
+      break;
+    case 'seer':
+      seerAction(db);
+      break;
+    case 'robber':
+      robberAction(db);
+      break;
+    case 'troublemaker':
+      troublemakerAction(db);
+      break;
+    default:
+      completeAction();
+  }
+});
+
 
 function selectOption(options) {
 
@@ -176,10 +199,6 @@ function searchPlayer(role){
 
 function votePlayer(players){
   selectPlayer(1, players, new Array(), (selection) => {
-    socket.on('votesCalculated', (results) => {
-      announce(results);
-    });
-
     socket.emit('voteCasted', selection[0]);
   });
 }
@@ -238,25 +257,3 @@ function troublemakerAction(db){
   var players = db.players;
   swapPlayers(players);
 }
-
-socket.on('gameHasBegun', function(db) {
-
-  clearInteractions();
-
-  switch (db.role) {
-    case 'werewolf':
-      werewolfAction(db);
-      break;
-    case 'seer':
-      seerAction(db);
-      break;
-    case 'robber':
-      robberAction(db);
-      break;
-    case 'troublemaker':
-      troublemakerAction(db);
-      break;
-    default:
-      completeAction();
-  }
-});
